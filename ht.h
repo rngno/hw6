@@ -107,7 +107,9 @@ public:
         if(this->numProbes_>=this->m_) {
             return this->npos; 
         }
-        HASH_INDEX_T loc = (this->start_ + this->numProbes_) % this->m_;
+
+        // are you serious this is what i forgot
+        HASH_INDEX_T loc = (this->start_ + (this->numProbes_* this->dhstep_)) % this->m_;
         this->numProbes_++;
         return loc;
     }
