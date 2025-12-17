@@ -45,7 +45,7 @@ struct LinearProber : public Prober<KeyType> {
     }
 };
 
-// To be completed TODO
+// To be completed 
 template <typename KeyType, typename Hash2>
 struct DoubleHashProber : public Prober<KeyType> 
 {
@@ -296,7 +296,7 @@ const HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::CAPACITIES[] =
         105359969, 210719881, 421439783, 842879579, 1685759167
     };
 
-// To be completed TODO
+// To be completed 
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 HashTable<K,V,Prober,Hash,KEqual>::HashTable(
     double resizeAlpha, const Prober& prober, const Hasher& hash, const KEqual& kequal)
@@ -314,10 +314,11 @@ HashTable<K,V,Prober,Hash,KEqual>::HashTable(
     totalProbes_ = 0;
 }
 
-// To be completed TODO
+// To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
 {
+    // go thru each row of the hash table and nuke what's there if it isnt alr deleted/null
     for(HASH_INDEX_T i = 0; i < CAPACITIES[mIndex_]; ++i)
     {
         if(table_[i] != nullptr)
@@ -328,14 +329,14 @@ HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
 
 }
 
-// To be completed TODO
+// To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 bool HashTable<K,V,Prober,Hash,KEqual>::empty() const
 {
     return (activeItems_ == 0);
 }
 
-// To be completed TODO
+// To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 {
@@ -346,21 +347,26 @@ size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
+    // check if our table is too full atm to insert 
     double currentLoadFactor = (double)(activeItems_ + deletedItems_) / (double)(CAPACITIES[mIndex_]);
     if(currentLoadFactor >= alpha_){
         resize();
     }
 
+    // check if item loc is already filled
     HASH_INDEX_T loc = probe(p.first);
 
+    // we went off the edge of the table lol
     if(loc == npos){
         throw std::logic_error("Table full");
     }
 
+    // if we didnt find the slot, time to make a new one (REMEMBER TO FREE LATER!!!)
     if(table_[loc] == nullptr){
         table_[loc] = new HashItem(p);
         activeItems_++;
     }
+    // if the thing is filled, p gets to be its new roommate lol
     else{
         table_[loc]->item.second = p.second;
     }
@@ -371,11 +377,15 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 {
+    // find the location of the item that we're gonna nuke
     HASH_INDEX_T loc = probe(key);
+
+    // didnt find it :3
     if(loc == npos || table_[loc] == nullptr){
         return;
     }
 
+    // delete if the item hasnt alr been nuked before
     if(!table_[loc]->deleted){
         table_[loc]->deleted = true;
         activeItems_--;
@@ -455,14 +465,18 @@ typename HashTable<K,V,Prober,Hash,KEqual>::HashItem* HashTable<K,V,Prober,Hash,
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
+    // check if we're too full to even resize
     if(mIndex_ >= 27){
         throw std::logic_error("Max capacity");
     }
     
+    // set up some stuff for the new table we're gonna have to make -> copy over to table_
     mIndex_++;
     HASH_INDEX_T newCapacity = CAPACITIES[mIndex_];
     std::vector<HashItem*> newTable(newCapacity, nullptr);
 
+    // go thru each location in table_ to rehash the current items in the table
+    // had to rewrite this a few times to be the anti-nester that i was made to be
     for(size_t i=0; i<table_.size(); ++i){
         HashItem* curr = table_[i];
 
