@@ -450,7 +450,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
     
     mIndex_++;
     HASH_INDEX_T newCapacity = CAPACITIES[mIndex_];
-    std::vector<HashItem*> oldTable = table_;
+    std::vector<HashItem*> newTable(capacity, nullptr);
 
     for(size_t i=0; i<table.size(); ++i){
         HashItem* curr = table_[i];
