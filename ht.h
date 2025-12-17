@@ -101,7 +101,16 @@ public:
     }
 
     // To be completed
-    HASH_INDEX_T next(); // already declared above? this should work??
+    // turns out this doesnt work when only the next() above is declared
+    HASH_INDEX_T next(){
+        // copying everything from the next() above
+        if(this->numProbes_>=this->m_) {
+            return this->npos; 
+        }
+        HASH_INDEX_T loc = (this->start_ + this->numProbes_) % this->m_;
+        this->numProbes_++;
+        return loc;
+    }
 };
 
 // Initialization of static array (do not alter)
