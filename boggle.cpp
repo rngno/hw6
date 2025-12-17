@@ -100,8 +100,13 @@ bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>
 
 	word += board[r][c];
 
-	// current word is not a prefix, so we have to just kill this
+	// current word is not a prefix, so we might have to just kill this
 	if(prefix.find(word) == prefix.end()){
+		// if word isnt an acutal word, we gotta just say its wrong
+		if(dict.find(word) != dict.end()){
+			result.insert(word);
+			return true;
+		}
 		return false;
 	}
 
