@@ -347,6 +347,11 @@ size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
+    // we went off the edge of the table lol
+    if(pos == npos){
+        throw std::logic_error("Table full");
+    }
+
     // check if our table is too full atm to insert 
     if((double)(activeItems_ + deletedItems_) / (double)(CAPACITIES[mIndex_]) >= alpha_){
         resize();
@@ -459,6 +464,11 @@ typename HashTable<K,V,Prober,Hash,KEqual>::HashItem* HashTable<K,V,Prober,Hash,
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
+    // check if we're too full to even resize
+    if(mIndex_ >= 27){
+        throw std::logic_error("Max capacity");
+    }
+    
     // set up some stuff for the new table we're gonna have to make -> copy over to table_
     mIndex_++;
     HASH_INDEX_T newCapacity = CAPACITIES[mIndex_];
