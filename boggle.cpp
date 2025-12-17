@@ -120,6 +120,7 @@ bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>
 	}
 
 	// biggest word is here
+	// i should put this in its own bool condition tbh but i already typed this out
 	if(dict.find(word) != dict.end()){
 		result.insert(word);
 		return true;
