@@ -348,27 +348,21 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
     // check if our table is too full atm to insert 
-    double currentLoadFactor = (double)(activeItems_ + deletedItems_) / (double)(CAPACITIES[mIndex_]);
-    if(currentLoadFactor >= alpha_){
+    if((double)(activeItems_ + deletedItems_) / (double)(CAPACITIES[mIndex_]) >= alpha_){
         resize();
     }
 
-    // check if item loc is already filled
-    HASH_INDEX_T loc = probe(p.first);
+    // check if item pos is already filled
+    HASH_INDEX_T pos = probe(p.first);
 
-    // we went off the edge of the table lol
-    if(loc == npos){
-        throw std::logic_error("Table full");
-    }
-
-    // if we didnt find the slot, time to make a new one (REMEMBER TO FREE LATER!!!)
-    if(table_[loc] == nullptr){
-        table_[loc] = new HashItem(p);
-        activeItems_++;
-    }
     // if the thing is filled, p gets to be its new roommate lol
+    if(table_[pos] != nullptr){
+        table_[pos]->item.second = p.second;
+    }
+    // if we didnt find the slot, time to make a new one (REMEMBER TO FREE LATER!!!)
     else{
-        table_[loc]->item.second = p.second;
+        table_[pos] = new HashItem(p);
+        activeItems_++;
     }
 
 }
@@ -378,16 +372,16 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 {
     // find the location of the item that we're gonna nuke
-    HASH_INDEX_T loc = probe(key);
+    HASH_INDEX_T pos = probe(key);
 
     // didnt find it :3
-    if(loc == npos || table_[loc] == nullptr){
+    if(table_[pos] == nullptr || pos == npos){
         return;
     }
 
     // delete if the item hasnt alr been nuked before
-    if(!table_[loc]->deleted){
-        table_[loc]->deleted = true;
+    if(!table_[pos]->deleted){
+        table_[pos]->deleted = true;
         activeItems_--;
         deletedItems_++;
     }
@@ -465,11 +459,6 @@ typename HashTable<K,V,Prober,Hash,KEqual>::HashItem* HashTable<K,V,Prober,Hash,
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
-    // check if we're too full to even resize
-    if(mIndex_ >= 27){
-        throw std::logic_error("Max capacity");
-    }
-    
     // set up some stuff for the new table we're gonna have to make -> copy over to table_
     mIndex_++;
     HASH_INDEX_T newCapacity = CAPACITIES[mIndex_];
@@ -497,14 +486,14 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
         HASH_INDEX_T h = hash_(key) % newCapacity;
         prober_.init(h, newCapacity, key);
 
-        HASH_INDEX_T loc = prober_.next();
-        while(loc != npos && newTable[loc] != nullptr){
-            loc = prober_.next();
+        HASH_INDEX_T pos = prober_.next();
+        while(pos != npos && newTable[pos] != nullptr){
+            pos = prober_.next();
         }
 
         // might need to handle if we top out on probes here but idk how to do that if im being honest
 
-        newTable[loc] = curr;
+        newTable[pos] = curr;
     }
 
     table_.swap(newTable);
