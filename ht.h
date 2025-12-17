@@ -293,7 +293,7 @@ HashTable<K,V,Prober,Hash,KEqual>::HashTable(
 {
     // Initialize any other data members as necessary
     mIndex_ = 0;
-    table.resize(CAPACITIES[mIndex_], nullptr); // fill table w nullptrs first so it doesnt get mad at me later
+    table_.resize(CAPACITIES[mIndex_], nullptr); // fill table w nullptrs first so it doesnt get mad at me later
 
     // my declared data mems, might need to nuke these if they dont work
     activeItems_ = 0;
@@ -450,7 +450,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
     
     mIndex_++;
     HASH_INDEX_T newCapacity = CAPACITIES[mIndex_];
-    std::vector<HashItem*> newTable(capacity, nullptr);
+    std::vector<HashItem*> newTable(newCapacity, nullptr);
 
     for(size_t i=0; i<table.size(); ++i){
         HashItem* curr = table_[i];
