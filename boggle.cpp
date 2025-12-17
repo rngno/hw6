@@ -94,11 +94,12 @@ std::set<std::string> boggle(const std::set<std::string>& dict, const std::set<s
 bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix, const std::vector<std::vector<char> >& board, 
 								   std::string word, std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
+	// base case: we walked off the end of the board and have to give up
 	if(r >= board.size() || c >= board[0].size()){
 		return false;
 	}
 
-	word += board[r][c];
+	word += board[r][c]; 
 
 	// current word is not a prefix, so we might have to just kill this
 	if(prefix.find(word) == prefix.end()){
@@ -110,6 +111,7 @@ bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>
 		return false;
 	}
 
+	// just putting this outside the condition cuz i got tired of looking at it in an if statement
 	bool downChain = boggleHelper(dict, prefix, board, word, result, r+dr, c+dc, dr, dc);
 
 	// found a bigger word down the chain
