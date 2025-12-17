@@ -347,11 +347,6 @@ size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
-    // we went off the edge of the table lol
-    if(pos == npos){
-        throw std::logic_error("Table full");
-    }
-
     // check if our table is too full atm to insert 
     if((double)(activeItems_ + deletedItems_) / (double)(CAPACITIES[mIndex_]) >= alpha_){
         resize();
@@ -359,6 +354,12 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 
     // check if item pos is already filled
     HASH_INDEX_T pos = probe(p.first);
+
+    // we went off the edge of the table lol
+    if(pos == npos){
+        throw std::logic_error("Table full");
+    }
+
 
     // if the thing is filled, p gets to be its new roommate lol
     if(table_[pos] != nullptr){
